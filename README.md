@@ -1,0 +1,1 @@
+# wg-tray-daemon
