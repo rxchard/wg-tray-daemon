@@ -1,60 +1,60 @@
 package util
 
 import (
-    "context"
-    "io"
+	"context"
+	"io"
 )
 
 type PipeStream struct {
-    ErrorChannel chan error
-    Blocked      bool
+	ErrorChannel chan error
+	Blocked      bool
 }
 
 func (p *PipeStream) Block() {
-    p.Blocked = true
+	p.Blocked = true
 }
 
 func (p *PipeStream) Unblock() {
-    p.Blocked = false
+	p.Blocked = false
 }
 
 func Pipe(ctx context.Context, src io.ReadCloser, dst io.WriteCloser) *PipeStream {
-    pipe := &PipeStream{
-        ErrorChannel: make(chan error),
-        Blocked:      false,
-    }
+	pipe := &PipeStream{
+		ErrorChannel: make(chan error),
+		Blocked:      false,
+	}
 
-    go func() {
-        buffer := make([]byte, 4096)
+	go func() {
+		buffer := make([]byte, 4096)
 
-        for {
-            select {
-            case <-ctx.Done():
-                return
-            default:
-                if pipe.Blocked {
-                    continue
-                }
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				if pipe.Blocked {
+					continue
+				}
 
-                n, err := src.Read(buffer)
-                if err != nil {
-                    pipe.ErrorChannel <- err
+				n, err := src.Read(buffer)
+				if err != nil {
+					pipe.ErrorChannel <- err
 
-                    if err == io.EOF {
-                        continue
-                    }
+					if err == io.EOF {
+						continue
+					}
 
-                    return
-                }
+					return
+				}
 
-                _, err = dst.Write(buffer[0:n])
-                if err != nil {
-                    pipe.ErrorChannel <- err
-                    return
-                }
-            }
-        }
-    }()
+				_, err = dst.Write(buffer[0:n])
+				if err != nil {
+					pipe.ErrorChannel <- err
+					return
+				}
+			}
+		}
+	}()
 
-    return pipe
+	return pipe
 }
