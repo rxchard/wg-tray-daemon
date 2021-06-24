@@ -21,5 +21,4 @@ StandardOutput=null
 
 [Install]
 WantedBy=multi-user.target
-
 ```
