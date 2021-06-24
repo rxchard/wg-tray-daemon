@@ -11,7 +11,7 @@ The daemon has to run under a user that has access to wireguard. You could creat
 
 Example service file:
 
-```toml
+```
 [Unit]
 Description=Wireguard Tray Daemon
 
